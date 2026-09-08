@@ -1,0 +1,66 @@
+{
+  "account": {
+    "id": "ACC-1001",
+    "memberId": "MEM-1",
+    "accountNumber": "483920174821",
+    "type": "CHECKING",
+    "currency": "USD",
+    "status": "OPEN",
+    "openingBalanceCents": 152000,
+    "currentBalanceCents": 1395700
+  },
+  "transactions": [
+    {
+      "id": 17,
+      "accountId": "ACC-1001",
+      "postedAt": "2025-01-03T09:12:00Z",
+      "type": "DEBIT",
+      "amountCents": 4500,
+      "description": "POS DEBIT COFFEE CO"
+    },
+    {
+      "id": 37,
+      "accountId": "ACC-1001",
+      "postedAt": "2025-01-08T11:05:00Z",
+      "type": "DEBIT",
+      "amountCents": 1200,
+      "description": "MONTHLY MAINTENANCE FEE"
+    },
+    {
+      "id": 29,
+      "accountId": "ACC-1001",
+      "postedAt": "2025-01-15T08:00:00Z",
+      "type": "DEBIT",
+      "amountCents": 15000,
+      "description": "LOAN PAYMENT AUTO 4471"
+    },
+    {
+      "id": 26,
+      "accountId": "ACC-1001",
+      "postedAt": "2025-01-21T16:45:00Z",
+      "type": "DEBIT",
+      "amountCents": 1750,
+      "description": "WIRE TRANSFER FEE"
+    },
+    {
+      "id": 8,
+      "accountId": "ACC-1001",
+      "postedAt": "2025-01-28T10:30:00Z",
+      "type": "CREDIT",
+      "amountCents": 1250,
+      "description": "DIVIDEND CREDIT"
+    },
+    {
+      "id": 3,
+      "accountId": "ACC-1001",
+      "postedAt": "2025-01-31T14:30:00Z",
+      "type": "CREDIT",
+      "amountCents": 1250000,
+      "description": "ACH CREDIT PAYROLL ACME CORP"
+    }
+  ],
+  "period": {
+    "from": "2025-01-01",
+    "to": "2025-01-31"
+  }
+}

@@ -1,0 +1,46 @@
+# Runs both test suites on every push.
+#
+# On a fresh clone BOTH jobs fail, and that is the point: one API test fails
+# because of Part B, and the statement builder test fails because Part C is not
+# written yet. The job for the language you picked should be green by the time
+# you submit. You are not expected to touch the other language, so leave that
+# job red.
+
+name: tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  python:
+    name: Python (FastAPI)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: python/requirements.txt
+      - name: Install dependencies
+        working-directory: python
+        run: pip install -r requirements.txt
+      - name: Run the tests
+        working-directory: python
+        run: python -m pytest
+
+  java:
+    name: Java (Spring Boot)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+      - name: Run the tests
+        working-directory: java
+        run: ./mvnw -B test

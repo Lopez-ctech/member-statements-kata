@@ -1,0 +1,15 @@
+# Python
+python/.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Java
+java/target/
+
+# Editors and OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

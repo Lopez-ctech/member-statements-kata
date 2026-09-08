@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/member-statements-kata/statement-schema.json",
+  "title": "Member statement",
+  "description": "The document build_statement produces and POST /statements accepts. Every money value is a string with exactly two decimals, converted from integer cents. Money is never a JSON number here: most JSON parsers turn numbers into floats, and a float cannot hold 0.10 exactly.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "maskedAccountNumber",
+    "currency",
+    "period",
+    "openingBalance",
+    "closingBalance",
+    "totals",
+    "transactions",
+    "largeTransactionCount"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "examples": ["ACC-1001"]
+    },
+    "maskedAccountNumber": {
+      "type": "string",
+      "pattern": "^\\*{4}\\d{4}$",
+      "description": "Four asterisks and the last four digits of the account number.",
+      "examples": ["****4821"]
+    },
+    "currency": {
+      "type": "string",
+      "examples": ["USD"]
+    },
+    "period": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "description": "Inclusive on both ends.",
+      "properties": {
+        "from": { "type": "string", "format": "date", "examples": ["2025-01-01"] },
+        "to": { "type": "string", "format": "date", "examples": ["2025-01-31"] }
+      }
+    },
+    "openingBalance": {
+      "$ref": "#/$defs/amount",
+      "description": "The account's balance at the start of the period."
+    },
+    "closingBalance": {
+      "$ref": "#/$defs/amount",
+      "description": "The last running balance, or the opening balance when the period has no transactions."
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["creditCount", "debitCount", "credits", "debits"],
+      "properties": {
+        "creditCount": { "type": "integer", "minimum": 0 },
+        "debitCount": { "type": "integer", "minimum": 0 },
+        "credits": {
+          "$ref": "#/$defs/amount",
+          "description": "Sum of credits, unsigned."
+        },
+        "debits": {
+          "$ref": "#/$defs/amount",
+          "description": "Sum of debits, unsigned."
+        }
+      }
+    },
+    "transactions": {
+      "type": "array",
+      "description": "Sorted by the source postedAt ascending, then by id ascending.",
+      "items": { "$ref": "#/$defs/statementLine" }
+    },
+    "largeTransactionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "How many lines have largeTransaction true."
+    }
+  },
+  "$defs": {
+    "amount": {
+      "type": "string",
+      "pattern": "^-?\\d+\\.\\d{2}$",
+      "description": "A signed decimal string with exactly two decimal places.",
+      "examples": ["1520.00", "-45.00", "0.00"]
+    },
+    "statementLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "date",
+        "description",
+        "amount",
+        "runningBalance",
+        "largeTransaction"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "The source transaction id, unchanged."
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "The UTC calendar date of the source postedAt.",
+          "examples": ["2025-01-03"]
+        },
+        "description": { "type": "string" },
+        "amount": {
+          "$ref": "#/$defs/amount",
+          "description": "Negative for a debit, positive for a credit.",
+          "examples": ["-45.00", "12500.00"]
+        },
+        "runningBalance": {
+          "$ref": "#/$defs/amount",
+          "description": "The balance after this transaction, starting from openingBalance and accumulating in sorted order."
+        },
+        "largeTransaction": {
+          "type": "boolean",
+          "description": "True when the absolute amount is strictly greater than 10000.00."
+        }
+      }
+    }
+  }
+}

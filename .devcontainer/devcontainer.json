@@ -1,0 +1,20 @@
+{
+  "name": "member-statements-kata",
+  "image": "mcr.microsoft.com/devcontainers/java:17-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11",
+      "installTools": true
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "ms-python.python"
+      ]
+    }
+  },
+  "postCreateCommand": "chmod +x java/mvnw scripts/*.sh || true",
+  "remoteUser": "vscode"
+}

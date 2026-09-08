@@ -1,0 +1,20 @@
+# Keep line endings sane across Windows, macOS and Linux.
+#
+# Without this, a repo touched on Windows hands CRLF files to macOS and Linux,
+# where `./mvnw` and `scripts/*.sh` then fail with a confusing
+# "bad interpreter: /bin/sh^M".
+
+* text=auto
+
+# Anything a POSIX shell has to execute must have LF endings.
+*.sh    text eol=lf
+mvnw    text eol=lf
+
+# Anything Windows executes is happier with CRLF.
+*.ps1   text eol=crlf
+*.cmd   text eol=crlf
+
+# Never touch binaries.
+*.jar   binary
+*.png   binary
+*.ico   binary

@@ -1,0 +1,68 @@
+{
+  "accountId": "ACC-1001",
+  "maskedAccountNumber": "****4821",
+  "currency": "USD",
+  "period": {
+    "from": "2025-01-01",
+    "to": "2025-01-31"
+  },
+  "openingBalance": "1520.00",
+  "closingBalance": "13808.00",
+  "totals": {
+    "creditCount": 2,
+    "debitCount": 4,
+    "credits": "12512.50",
+    "debits": "224.50"
+  },
+  "transactions": [
+    {
+      "id": 17,
+      "date": "2025-01-03",
+      "description": "POS DEBIT COFFEE CO",
+      "amount": "-45.00",
+      "runningBalance": "1475.00",
+      "largeTransaction": false
+    },
+    {
+      "id": 37,
+      "date": "2025-01-08",
+      "description": "MONTHLY MAINTENANCE FEE",
+      "amount": "-12.00",
+      "runningBalance": "1463.00",
+      "largeTransaction": false
+    },
+    {
+      "id": 29,
+      "date": "2025-01-15",
+      "description": "LOAN PAYMENT AUTO 4471",
+      "amount": "-150.00",
+      "runningBalance": "1313.00",
+      "largeTransaction": false
+    },
+    {
+      "id": 26,
+      "date": "2025-01-21",
+      "description": "WIRE TRANSFER FEE",
+      "amount": "-17.50",
+      "runningBalance": "1295.50",
+      "largeTransaction": false
+    },
+    {
+      "id": 8,
+      "date": "2025-01-28",
+      "description": "DIVIDEND CREDIT",
+      "amount": "12.50",
+      "runningBalance": "1308.00",
+      "largeTransaction": false
+    },
+    {
+      "id": 3,
+      "date": "2025-01-31",
+      "description": "ACH CREDIT PAYROLL ACME CORP",
+      "amount": "12500.00",
+      "runningBalance": "13808.00",
+      "largeTransaction": true
+    }
+  ],
+  "largeTransactionCount": 1
+}

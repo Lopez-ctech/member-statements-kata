@@ -1,0 +1,277 @@
+openapi: 3.0.3
+info:
+  title: Core Accounts API
+  version: "1.0.0"
+  description: |
+    System API over the credit union's core accounts ledger.
+
+    Conventions used throughout:
+
+    * JSON field names are camelCase.
+    * Money is an integer number of cents. Fields carrying money end in `Cents`.
+      There are no floating point amounts anywhere in this API.
+    * Timestamps are ISO 8601 in UTC, with a `Z` suffix, e.g. `2025-01-31T14:30:00Z`.
+    * Dates in query parameters are `YYYY-MM-DD`.
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /health:
+    get:
+      summary: Liveness check
+      operationId: health
+      responses:
+        "200":
+          description: The service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    example: UP
+
+  /accounts:
+    get:
+      summary: List all accounts
+      description: Balances are deliberately not included. Fetch one account for those.
+      operationId: listAccounts
+      responses:
+        "200":
+          description: Every account, ordered by id
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AccountSummary"
+
+  /accounts/{accountId}:
+    get:
+      summary: Get one account, with balances
+      operationId: getAccount
+      parameters:
+        - $ref: "#/components/parameters/AccountId"
+      responses:
+        "200":
+          description: The account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /accounts/{accountId}/transactions:
+    get:
+      summary: List transactions for an account over a date range
+      description: |
+        **The date range is INCLUSIVE on both ends.** A request for
+        `from=2025-01-01&to=2025-01-31` returns every transaction posted on
+        1 January through to 31 January, including transactions posted at any
+        time of day on 31 January.
+
+        `postedAt` carries a time of day; `from` and `to` are calendar dates.
+        A transaction belongs to the range when its UTC calendar date falls
+        within it.
+
+        Results are ordered by `postedAt` ascending, then by `id` ascending, so
+        transactions sharing a timestamp always come back in the same order.
+
+        Parameters are validated before the account is looked up: a request
+        with missing or malformed dates is a 400 whether or not the account
+        exists.
+      operationId: listTransactions
+      parameters:
+        - $ref: "#/components/parameters/AccountId"
+        - name: from
+          in: query
+          required: true
+          description: First day of the range, inclusive.
+          schema:
+            type: string
+            format: date
+            example: "2025-01-01"
+        - name: to
+          in: query
+          required: true
+          description: Last day of the range, inclusive.
+          schema:
+            type: string
+            format: date
+            example: "2025-01-31"
+      responses:
+        "200":
+          description: Transactions in the range
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+        "400":
+          description: |
+            `from` or `to` is missing, is not a `YYYY-MM-DD` date, or `from` is
+            after `to`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /statements:
+    post:
+      summary: Receive a member statement
+      description: |
+        A stub receiver standing in for the downstream statement service. It
+        checks the shape of the document, keeps it in memory, and returns an id.
+        Nothing is persisted across restarts.
+
+        Checks applied: every required field is present and of the right type;
+        every money field is a string matching `^-?\d+\.\d{2}$`;
+        `maskedAccountNumber` matches `^\*{4}\d{4}$`.
+      operationId: postStatement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: See docs/statement-schema.json for the full schema.
+      responses:
+        "201":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [statementId]
+                properties:
+                  statementId:
+                    type: string
+                    example: STMT-0001
+        "422":
+          description: The document broke the contract. Every broken rule is listed.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Error"
+                  - type: object
+                    properties:
+                      fieldErrors:
+                        type: array
+                        items:
+                          type: object
+                          required: [field, message]
+                          properties:
+                            field:
+                              type: string
+                              example: totals.credits
+                            message:
+                              type: string
+                              example: must be a string matching ^-?\d+\.\d{2}$
+
+components:
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      required: true
+      schema:
+        type: string
+        example: ACC-1001
+
+  responses:
+    NotFound:
+      description: No account with that id
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    AccountSummary:
+      type: object
+      required: [id, memberId, accountNumber, type, currency, status]
+      properties:
+        id:
+          type: string
+          example: ACC-1001
+        memberId:
+          type: string
+          example: MEM-1
+        accountNumber:
+          type: string
+          example: "483920174821"
+        type:
+          type: string
+          enum: [CHECKING, SAVINGS]
+        currency:
+          type: string
+          example: USD
+        status:
+          type: string
+          enum: [OPEN, CLOSED]
+
+    AccountDetail:
+      allOf:
+        - $ref: "#/components/schemas/AccountSummary"
+        - type: object
+          required: [openingBalanceCents, currentBalanceCents]
+          properties:
+            openingBalanceCents:
+              type: integer
+              format: int64
+              description: Balance as of 2025-01-01T00:00:00Z. Stored.
+              example: 152000
+            currentBalanceCents:
+              type: integer
+              format: int64
+              description: |
+                Opening balance plus every credit, minus every debit. Computed
+                on every read from all transactions on the account, with no
+                date filter applied.
+              example: 1395700
+
+    Transaction:
+      type: object
+      required: [id, accountId, postedAt, type, amountCents, description]
+      properties:
+        id:
+          type: integer
+          example: 3
+        accountId:
+          type: string
+          example: ACC-1001
+        postedAt:
+          type: string
+          format: date-time
+          description: ISO 8601, UTC.
+          example: "2025-01-31T14:30:00Z"
+        type:
+          type: string
+          enum: [DEBIT, CREDIT]
+          description: The sign of the transaction. `amountCents` is always positive.
+        amountCents:
+          type: integer
+          format: int64
+          description: Always positive. Apply the sign from `type`.
+          example: 1250000
+        description:
+          type: string
+          example: ACH CREDIT PAYROLL ACME CORP
+
+    Error:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          enum: [BAD_REQUEST, NOT_FOUND, UNPROCESSABLE_ENTITY]
+        message:
+          type: string
