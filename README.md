@@ -1,28 +1,11 @@
 # Member Statements Kata
 
-A small take-home exercise for the **Associate Integrations Engineer** role.
+A small take-home exercise.
 
 You are handed a working service you did not write: a **Core Accounts API** over a
-credit union's ledger. Downstream of it, a nightly job builds monthly **member
+bank ledger. Downstream of it, a nightly job builds monthly **member
 statements** and delivers them to a statement service. You will read the API,
 fix a defect in it, and build the statement job.
-
-**Expected time: 2 to 4 hours.** If you are past four hours, stop and submit what
-you have — an honest partial submission with notes reads better than a rushed
-complete one.
-
-No MuleSoft experience is expected or tested. This is about the skills underneath
-it: reading an API contract, tracing a request through layers, transforming one
-JSON shape into another without corrupting money values, and testing that logic
-in isolation.
-
-### About AI tools
-
-AI tools are welcome; this role expects you to use them well. In `SUBMISSION.md`,
-note which tools you used, one prompt that helped, and one suggestion you
-rejected. You will be asked to explain every line and to change the code live.
-
----
 
 ## 1. Pick one language
 
@@ -269,8 +252,7 @@ language should be green; leave the other one red.
 
 A 45 to 60 minute conversation. You will share your screen and walk through the
 code, explain the defect and your fix, talk through your statement builder and
-your tests, and make one small change to it live while we watch. Part of the
-session may be conducted in Spanish.
+your tests, and make one small change to it live while we watch.
 
 We are not testing recall. Bring the repo, bring your reasoning, and be ready to
 say "I do not know" about the parts you did not get to.
